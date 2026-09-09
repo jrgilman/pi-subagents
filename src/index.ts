@@ -3600,6 +3600,13 @@ Write the file using the write tool. Only write the file, nothing else.`;
           values: ["on", "off"],
         },
         {
+          id: "exposeCwd",
+          label: "Expose cwd",
+          description: "Optional `cwd` on the Agent tool (off removes the param from the tool spec on next pi session)",
+          currentValue: isExposeCwdEnabled() ? "on" : "off",
+          values: ["on", "off"],
+        },
+        {
           id: "workflowsEnabled",
           label: "Workflows",
           description:
@@ -3785,6 +3792,19 @@ Write the file using the write tool. Only write the file, nothing else.`;
           notifyApplied(
             ctx,
             `Scheduling ${enabled ? "enabled" : "disabled"}. Tool spec change takes effect on next pi session.`,
+          );
+        }
+      } else if (id === "exposeCwd") {
+        const enabled = value === "on";
+        if (enabled === isExposeCwdEnabled()) {
+          ctx.ui.notify(`Expose cwd already ${enabled ? "enabled" : "disabled"}.`, "info");
+        } else {
+          setExposeCwd(enabled);
+          // Calls honor the new value immediately (the execute guard reads it
+          // live); only the schema entry waits for the next session.
+          notifyApplied(
+            ctx,
+            `Expose cwd ${enabled ? "enabled" : "disabled"}. Tool spec change takes effect on next pi session.`,
           );
         }
       } else if (id === "workflowsEnabled") {
