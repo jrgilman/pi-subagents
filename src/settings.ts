@@ -66,6 +66,8 @@ export interface SubagentsSettings {
    * (next pi session); runtime menu/runtime-fire short-circuit is immediate.
    */
   schedulingEnabled?: boolean;
+  /** Whether Agent calls may override the working directory. Defaults to false. */
+  exposeCwd?: boolean;
   /**
    * When true, the effective model of each subagent spawn is validated
    * against `enabledModels` from pi's settings — both global
@@ -315,6 +317,7 @@ export interface SettingsAppliers {
   setDefaultJoinMode: (mode: JoinMode) => void;
   setBackgroundByDefault: (b: boolean) => void;
   setSchedulingEnabled: (b: boolean) => void;
+  setExposeCwd: (b: boolean) => void;
   setScopeModels: (enabled: boolean) => void;
   setStrictAgentFiles: (b: boolean) => void;
   setDisableDefaultAgents: (b: boolean) => void;
@@ -401,6 +404,9 @@ function sanitize(raw: unknown): SubagentsSettings {
   }
   if (typeof r.schedulingEnabled === "boolean") {
     out.schedulingEnabled = r.schedulingEnabled;
+  }
+  if (typeof r.exposeCwd === "boolean") {
+    out.exposeCwd = r.exposeCwd;
   }
   if (typeof r.scopeModels === "boolean") {
     out.scopeModels = r.scopeModels;
@@ -522,6 +528,7 @@ export function applySettings(s: SubagentsSettings, appliers: SettingsAppliers):
   if (s.defaultJoinMode) appliers.setDefaultJoinMode(s.defaultJoinMode);
   if (typeof s.backgroundByDefault === "boolean") appliers.setBackgroundByDefault(s.backgroundByDefault);
   if (typeof s.schedulingEnabled === "boolean") appliers.setSchedulingEnabled(s.schedulingEnabled);
+  if (typeof s.exposeCwd === "boolean") appliers.setExposeCwd(s.exposeCwd);
   if (typeof s.scopeModels === "boolean") appliers.setScopeModels(s.scopeModels);
   if (typeof s.strictAgentFiles === "boolean") appliers.setStrictAgentFiles(s.strictAgentFiles);
   if (typeof s.disableDefaultAgents === "boolean") appliers.setDisableDefaultAgents(s.disableDefaultAgents);

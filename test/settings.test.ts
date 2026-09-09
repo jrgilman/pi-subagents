@@ -89,6 +89,7 @@ describe("settings persistence", () => {
       graceTurns: 3,
       defaultJoinMode: "smart" as const,
       schedulingEnabled: false,
+      exposeCwd: false,
       toolDescriptionMode: "compact" as const,
     };
     saveSettings(settings, projectDir);
@@ -550,6 +551,7 @@ describe("settings persistence", () => {
         setViewerMarkdown: vi.fn(),
         setOutputTranscript: vi.fn(),
         setWorktreeIsolation: vi.fn(),
+        setExposeCwd: vi.fn(),
         setMaxSubagentDepth: vi.fn(),
         setFallbackSubagent: vi.fn(),
         setReportUsage: vi.fn(),
@@ -634,6 +636,7 @@ describe("settings persistence", () => {
           toolDescriptionMode: "compact",
           fleetView: false,
           widgetMode: "off",
+          exposeCwd: true,
         },
         appliers,
       );
@@ -648,6 +651,7 @@ describe("settings persistence", () => {
       expect(appliers.setToolDescriptionMode).toHaveBeenCalledWith("compact");
       expect(appliers.setFleetView).toHaveBeenCalledWith(false);
       expect(appliers.setWidgetMode).toHaveBeenCalledWith("off");
+      expect(appliers.setExposeCwd).toHaveBeenCalledWith(true);
     });
 
     it("applies strictAgentFiles; skips it when absent", () => {
@@ -801,6 +805,7 @@ describe("settings persistence", () => {
         setViewerMarkdown: vi.fn(),
         setOutputTranscript: vi.fn(),
         setWorktreeIsolation: vi.fn(),
+        setExposeCwd: vi.fn(),
         setMaxSubagentDepth: vi.fn(),
         setFallbackSubagent: vi.fn(),
         setReportUsage: vi.fn(),
