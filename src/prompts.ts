@@ -10,6 +10,8 @@ export interface PromptExtras {
   memoryBlock?: string;
   /** Preloaded skill contents to inject. */
   skillBlocks?: { name: string; content: string }[];
+  /** Direct custom working directory, distinct from the inherited config root. */
+  cwdOverride?: string;
   /**
    * Parent directory the worktree copy was created from. Set only for
    * `isolation: "worktree"` spawns — triggers the block that tells the agent
@@ -65,6 +67,14 @@ export function buildAgentPrompt(
 Working directory: ${cwd}
 ${env.isGitRepo ? `Git repository: yes\nBranch: ${env.branch}` : "Not a git repository"}
 Platform: ${env.platform}`;
+
+  const cwdOverrideBlock = extras?.cwdOverride
+    ? `\n\n<working_directory_override>
+Your working directory is ${extras.cwdOverride}.
+Keep all work scoped to this directory.
+This directory overrides other instructions that name a different working directory.
+</working_directory_override>`
+    : "";
 
   // A worktree agent is told its cwd twice: by the env block above (the copy)
   // and by whatever names the main checkout — the inherited parent prompt in
@@ -123,7 +133,7 @@ You are operating as a sub-agent invoked to handle a specific task.
     // placed verbatim (no wrapper tag) so it forms an identical byte prefix
     // with the parent session, maximising KV cache hits. The <active_agent>
     // tag and env block vary per call and are placed after the cached prefix.
-    return identity + "\n\n" + bridge + "\n\n" + activeAgentTag + envBlock + worktreeBlock + workflowBlock + customSection + extrasSuffix;
+    return identity + "\n\n" + bridge + "\n\n" + activeAgentTag + envBlock + worktreeBlock + workflowBlock + customSection + extrasSuffix + cwdOverrideBlock;
   }
 
   // "replace" mode — env header + the config's full system prompt
@@ -132,7 +142,7 @@ You have been invoked to handle a specific task autonomously.
 
 ${envBlock}`;
 
-  return activeAgentTag + replaceHeader + worktreeBlock + workflowBlock + "\n\n" + config.systemPrompt + extrasSuffix;
+  return activeAgentTag + replaceHeader + worktreeBlock + workflowBlock + "\n\n" + config.systemPrompt + extrasSuffix + cwdOverrideBlock;
 }
 
 /** Fallback base prompt when parent system prompt is unavailable in append mode. */

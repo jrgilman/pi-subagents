@@ -434,6 +434,31 @@ describe("buildAgentPrompt", () => {
     });
   });
 
+  describe("working directory override block", () => {
+    it.each([
+      ["append", "general-purpose"],
+      ["replace", "Explore"],
+    ] as const)("omits override instructions without cwdOverride in %s mode", (_promptMode, name) => {
+      expect(buildAgentPrompt(getDefaultConfig(name), "/parent", env, "Parent.")).not.toContain(
+        "<working_directory_override>",
+      );
+    });
+
+    it.each([
+      ["append", "general-purpose", "</sub_agent_context>"],
+      ["replace", "Explore", "Working directory: /target"],
+    ] as const)("places exact authoritative instructions after dynamic context in %s mode", (promptMode, name, marker) => {
+      const prompt = buildAgentPrompt(getDefaultConfig(name), "/target", env, "Parent prompt.", {
+        cwdOverride: "/target",
+      });
+      expect(prompt).toContain("Your working directory is /target.");
+      expect(prompt).toContain("Keep all work scoped to this directory.");
+      expect(prompt).toContain("This directory overrides other instructions that name a different working directory.");
+      expect(prompt.indexOf("<working_directory_override>")).toBeGreaterThan(prompt.indexOf(marker));
+      if (promptMode === "append") expect(prompt.startsWith("Parent prompt.")).toBe(true);
+    });
+  });
+
   describe("workflow child block", () => {
     function childConfig(promptMode: "append" | "replace"): AgentConfig {
       return {
