@@ -1455,6 +1455,18 @@ export default function (pi: ExtensionAPI) {
   const scheduleParam: Partial<typeof scheduleParamShape> =
     isSchedulingEnabled() ? scheduleParamShape : {};
 
+  const cwdParamShape = {
+    cwd: Type.Optional(
+      Type.String({
+        description:
+          "Optional: absolute path to an existing directory; the agent's tools operate there. " +
+          "The parent project's `.pi` configuration remains active; the target directory's `.pi` configuration does not load. " +
+          "Incompatible with resume and schedule.",
+      }),
+    ),
+  };
+  const cwdParam: Partial<typeof cwdParamShape> = isExposeCwdEnabled() ? cwdParamShape : {};
+
   const scheduleGuideline = isSchedulingEnabled()
     ? `\n- Use \`schedule\` only when the user explicitly asked for scheduled / recurring / delayed execution (e.g. "every Monday", "in an hour"). Don't auto-schedule from vague intent like "monitor X" — run once now or ask.`
     : "";
@@ -1647,6 +1659,7 @@ Terse command-style prompts produce shallow, generic work.
           description: "If true, fork parent conversation into the agent. Default: false (fresh context).",
         }),
       ),
+      ...cwdParam,
       ...isolationParam(isWorktreeIsolationEnabled()),
       ...scheduleParam,
     }),
@@ -1770,6 +1783,19 @@ Terse command-style prompts produce shallow, generic work.
     // ---- Execute ----
 
     execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+      const cwd = params.cwd as string | undefined;
+      if (cwd !== undefined) {
+        if (!isExposeCwdEnabled()) {
+          return textResult("The `cwd` parameter is disabled. Set `exposeCwd: true` in subagents settings to enable it.");
+        }
+        if (params.resume) {
+          return textResult("Cannot combine `cwd` with `resume` — a resumed session keeps its existing working directory.");
+        }
+        if (params.schedule) {
+          return textResult("Cannot combine `schedule` with `cwd` — scheduled jobs do not support custom working directories.");
+        }
+      }
+
       // Ensure we have UI context for widget rendering
       widget.setUICtx(ctx.ui as UICtx);
 
@@ -2067,6 +2093,7 @@ Terse command-style prompts produce shallow, generic work.
           thinkingLevel: thinking,
           isBackground: true,
           isolation,
+          cwd,
           invocation: agentInvocation,
           rootSessionId: ctx.sessionManager.getSessionId(),
           ...bgCallbacks,
@@ -2220,6 +2247,7 @@ Terse command-style prompts produce shallow, generic work.
           inheritContext,
           thinkingLevel: thinking,
           isolation,
+          cwd,
           invocation: agentInvocation,
           signal,
           rootSessionId: ctx.sessionManager.getSessionId(),
