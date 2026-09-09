@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **The `Agent` tool takes an optional `cwd`, gated behind the `exposeCwd` setting (default off).** A fresh foreground or background agent starts in an existing directory instead of the project root — unlike `isolation: "worktree"`, which creates a temporary copy. The value must be an absolute path to an existing directory; validation reuses the manager's existing spawn checks, so an invalid path fails the call before any agent record exists, and `resume` and `schedule` refuse the combination outright. The parent project keeps supplying `.pi` configuration and the target directory's never loads. The child's prompt names the directory as authoritative — guidance, not a sandbox. Toggle via `/agents → Settings → Expose cwd`; the schema entry follows on the next pi session.
+
 ### Fixed
 - **The workflow stand-down now recognises a lowercase `workflow` tool** ([#283](https://github.com/tintinweb/pi-subagents/issues/283) — thanks [@zampierilucas](https://github.com/zampierilucas)). The match is exact on purpose, and the set held `Workflow` and `SubagentWorkflow` only, so `@quintinshaw/pi-dynamic-workflows` — which registers lowercase `workflow` — never tripped it: with `workflowsEnabled` unset, both orchestrators reached the model and nothing warned. Adding the third name is the whole fix; exactness is kept, so a `list_workflows` still cannot take the feature down.
+### Added
+- **The `Agent` tool takes an optional `cwd`, gated behind the `exposeCwd` setting (default off).** A fresh foreground or background agent starts in an existing directory instead of the project root — unlike `isolation: "worktree"`, which creates a temporary copy. The value must be an absolute path to an existing directory; validation reuses the manager's existing spawn checks, so an invalid path fails the call before any agent record exists, and `resume` and `schedule` refuse the combination outright. The parent project keeps supplying `.pi` configuration and the target directory's never loads. The child's prompt names the directory as authoritative — guidance, not a sandbox. Toggle via `/agents → Settings → Expose cwd`; the schema entry follows on the next pi session.
 
 ## [0.19.0] - 2026-08-25
 
