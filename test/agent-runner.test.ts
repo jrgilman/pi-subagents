@@ -276,6 +276,20 @@ describe("agent-runner final output capture", () => {
     expect(vi.mocked(buildAgentPrompt).mock.lastCall![4]).not.toHaveProperty("worktreeBase");
   });
 
+  it.each([
+    ["direct differing cwd gets cwdOverride", { cwd: "/target", configCwd: "/parent" }, "/target", undefined],
+    ["equivalent path omits cwdOverride", { cwd: "/parent/.", configCwd: "/parent" }, undefined, undefined],
+    ["worktree gets worktreeBase and no cwdOverride", { cwd: "/wt", configCwd: "/parent", worktreeBase: "/repo" }, undefined, "/repo"],
+  ] as const)("%s", async (_label, options, override, worktreeBase) => {
+    const { buildAgentPrompt } = await import("../src/prompts.js");
+    createAgentSession.mockResolvedValue({ session: createSession("SCOPED").session });
+    await runAgent(ctx, "Explore", "Say SCOPED", { pi, ...options });
+    const extras = vi.mocked(buildAgentPrompt).mock.lastCall![4];
+    if (override) expect(extras).toHaveProperty("cwdOverride", override);
+    else expect(extras).not.toHaveProperty("cwdOverride");
+    if (worktreeBase) expect(extras).toHaveProperty("worktreeBase", worktreeBase);
+  });
+
   it("marks a workflow child so its prompt says the final text is the return value", async () => {
     const { buildAgentPrompt } = await import("../src/prompts.js");
     const { session } = createSession("RAW");
