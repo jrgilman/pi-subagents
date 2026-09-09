@@ -629,6 +629,9 @@ export async function runAgent(
 
   // Build prompt extras (memory, skill preloading)
   const extras: PromptExtras = {};
+  if (options.worktreeBase === undefined && resolve(effectiveCwd) !== resolve(configCwd)) {
+    extras.cwdOverride = effectiveCwd;
+  }
   if (options.worktreeBase) extras.worktreeBase = options.worktreeBase;
   if (options.workflow && !options.structuredOutput) extras.workflowChild = true;
 
