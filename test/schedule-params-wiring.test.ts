@@ -176,6 +176,18 @@ describe("Agent tool → schedule restrictions", () => {
     }
   });
 
+  it("refuses `schedule` with `cwd` and creates no scheduled job", async () => {
+    const { reply, jobCount, restore } = await scheduleCall({ cwd: "/tmp" }, { exposeCwd: true });
+    try {
+      expect(reply).toBe(
+        "Cannot combine `schedule` with `cwd` — scheduled jobs do not support custom working directories.",
+      );
+      expect(jobCount).toBe(0);
+    } finally {
+      restore();
+    }
+  });
+
   it("refuses `schedule` with `inherit_context` — no parent conversation at fire time", async () => {
     const { reply, jobCount, restore } = await scheduleCall({ inherit_context: true });
     try {

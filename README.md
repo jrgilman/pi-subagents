@@ -414,9 +414,12 @@ Launch a sub-agent.
 | `max_turns` | number | no | Max agentic turns. Omit for unlimited (default) |
 | `run_in_background` | boolean | no | Defaults to `true`; `false` blocks and returns the result inline |
 | `resume` | string | no | Agent ID to resume a previous session |
+| `cwd` | string | no | Fresh-spawn working directory. Requires `exposeCwd: true` and an absolute path to an existing directory |
 | `isolated` | boolean | no | No extension/MCP tools |
 | `isolation` | `"off"` \| `"worktree"` | no | `worktree` runs in an isolated git worktree; `off` (the default) does not. Absent from the schema entirely when `worktreeIsolation: false` |
 | `inherit_context` | boolean | no | Fork parent conversation into agent |
+
+`cwd` applies only to fresh spawns, foreground or background, and refuses `resume` and `schedule`. It sets where the agent's tools operate and adds an authoritative working-directory block to its prompt — guidance, not a sandbox. The parent project's `.pi` configuration stays active; the target directory's never loads. Combined with `isolation: "worktree"`, the temporary worktree is created from the target repository and its branch lands there. Cross-extension RPC `options.cwd` is unchanged and needs no `exposeCwd`.
 
 ### `SubagentWorkflow`
 
