@@ -1180,6 +1180,10 @@ export default function (pi: ExtensionAPI) {
   function isSchedulingEnabled(): boolean { return schedulingEnabled; }
   function setSchedulingEnabled(b: boolean) { schedulingEnabled = b; }
 
+  let exposeCwd = false;
+  function isExposeCwdEnabled(): boolean { return exposeCwd; }
+  function setExposeCwd(b: boolean): void { exposeCwd = b; }
+
   // Master switch for scripted workflows. Defaults to ON. Off means the
   // `SubagentWorkflow` tool is never registered: the model is not told the
   // feature exists (zero context cost) and has nothing to call. The
@@ -1409,6 +1413,7 @@ export default function (pi: ExtensionAPI) {
       setDefaultJoinMode,
       setBackgroundByDefault,
       setSchedulingEnabled,
+      setExposeCwd,
       setScopeModels: setScopeModelsEnabled,
       setStrictAgentFiles: (b) => { strictAgentFiles = b; },
       setDisableDefaultAgents: setDisableDefaultAgents,
@@ -3447,6 +3452,7 @@ Write the file using the write tool. Only write the file, nothing else.`;
       defaultJoinMode: getDefaultJoinMode(),
       backgroundByDefault: getBackgroundByDefault(),
       schedulingEnabled: isSchedulingEnabled(),
+      exposeCwd: isExposeCwdEnabled(),
       scopeModels: isScopeModelsEnabled(),
       strictAgentFiles,
       disableDefaultAgents: isDefaultsDisabled(),
