@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Host-provided typebox packages are declared as peer dependencies with a `"*"` range instead of `dependencies`.** Pi 1.4.0 supplies `typebox` and `@sinclair/typebox` to extensions and warns when a manifest lists them as `dependencies`, because an installed copy can bypass the extension loader and duplicate runtime modules. The pinned copies move to `devDependencies` so vitest and tsc keep resolving them; pi's module mapping already serves both import names at runtime.
+
 ### Added
 - **The `Agent` tool takes an optional `cwd`, gated behind the `exposeCwd` setting (default off).** A fresh foreground or background agent starts in an existing directory instead of the project root — unlike `isolation: "worktree"`, which creates a temporary copy. The value must be an absolute path to an existing directory; validation reuses the manager's existing spawn checks, so an invalid path fails the call before any agent record exists, and `resume` and `schedule` refuse the combination outright. The parent project keeps supplying `.pi` configuration and the target directory's never loads. The child's prompt names the directory as authoritative — guidance, not a sandbox. Toggle via `/agents → Settings → Expose cwd`; the schema entry follows on the next pi session.
 
